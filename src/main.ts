@@ -1,32 +1,13 @@
-type A = {
-  age?: number | string;
-  nick?: string;
-  info?: string[] | number[];
-  photo?: string | null;
+const func = (src: Array<Record<string, number>>) => {
+  let sum = 0;
+
+  for (const obj of src) {
+    for (const number of Object.values(obj)) {
+      sum += number;
+    }
+  }
+
+  return sum;
 };
 
-const a1: A = {
-  age: 10,
-  nick: 'mynick',
-  info: [1, 100],
-  photo: 'string',
-};
-
-const a2: A = {
-  age: '10 years',
-  nick: '',
-  info: { id: 100 },
-  photo: null,
-};
-
-const a3: A = {
-  nick: '       ',
-  info: ['secret', 'key'],
-};
-
-const a4: A = {
-  nick: '',
-  info: {},
-};
-
-console.log(a1, a2, a3, a4);
+console.log(func([{ a: 20, b: 30 }, {}, { a: 3 }, { x: 5 }])); // 58
