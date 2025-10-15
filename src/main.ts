@@ -1,20 +1,35 @@
-const palindrome = (src: string) => {
-  let a = 0;
-  let b = src.length - 1;
-
-  while (a < src.length) {
-    if (src[a] !== src[b]) {
-      return false;
-    }
-    a++;
-    b--;
-  }
-
-  return true;
+type A = {
+  age?: number | string;
+  nick?: string;
+  info?: string[] | number[] | { id?: number };
+  photo?: string | null;
 };
-console.log(palindrome('топот')); // true
-console.log(palindrome('кабак')); // true
-console.log(palindrome('Топот')); // false (если не использовать toLowerCase)
-console.log(palindrome('привет')); // false
-console.log(palindrome('а')); // true
-console.log(palindrome('')); // true
+
+const a1: A = {
+  age: 10,
+  nick: 'mynick',
+  info: [1, 100],
+  photo: 'string',
+};
+
+const a2: A = {
+  age: '10 years',
+  nick: '',
+  info: { id: 100 },
+  photo: null,
+};
+
+const a3: A = {
+  nick: '       ',
+  info: ['secret', 'key'],
+};
+
+const a4: A = {
+  nick: '',
+  info: {},
+};
+
+console.log(a1);
+console.log(a2);
+console.log(a3);
+console.log(a4);
