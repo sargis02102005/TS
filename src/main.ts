@@ -9,13 +9,15 @@ type Order = {
 };
 
 const printOrder = (order: Order) => {
-  const messades = {
-    pending: chalk.yellow('Ожидает обработки'),
-    preparing: chalk.red('Готовится!'),
-    delivering: chalk.blue('Доставка!'),
-    completed: chalk.green('Выполнен!'),
-  };
-  console.log(chalk.bgBlack(`Заказ #${order.id}: ${messades[order.status]}`));
+  if (order.status === 'pending') {
+    console.log(chalk.bgBlack(`Заказ #${order.id}:`), chalk.yellow('Ожидает обработки'));
+  } else if (order.status === 'preparing') {
+    console.log(chalk.bgBlack(`Заказ #${order.id}:`), chalk.red('Готовится!'));
+  } else if (order.status === 'delivering') {
+    console.log(chalk.bgBlack(`Заказ #${order.id}:`), chalk.blue('Доставка!'));
+  } else {
+    console.log(chalk.bgBlack(`Заказ #${order.id}:`), chalk.green('Выполнен!'));
+  }
 };
 
 printOrder({ id: 1, amount: 500, status: 'preparing' });
