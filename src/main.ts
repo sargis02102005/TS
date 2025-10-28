@@ -1,25 +1,46 @@
-import chalk from 'chalk';
+import { faker } from '@faker-js/faker';
 
-type statusOrder = 'pending' | 'preparing' | 'delivering' | 'completed';
-
-type Order = {
+type User = {
   id: number;
-  amount: number;
-  status: statusOrder;
+  name: string;
+  age: number;
+  address: string;
+  animal: Animal;
+  job: Job;
 };
 
-const printOrder = (order: Order) => {
-  if (order.status === 'pending') {
-    console.log(chalk.bgBlack(`Заказ #${order.id}:`), chalk.yellow('Ожидает обработки'));
-  } else if (order.status === 'preparing') {
-    console.log(chalk.bgBlack(`Заказ #${order.id}:`), chalk.red('Готовится!'));
-  } else if (order.status === 'delivering') {
-    console.log(chalk.bgBlack(`Заказ #${order.id}:`), chalk.blue('Доставка!'));
-  } else {
-    console.log(chalk.bgBlack(`Заказ #${order.id}:`), chalk.green('Выполнен!'));
-  }
+type Animal = {
+  name: string;
+  species: string;
+  breed: string;
 };
 
-printOrder({ id: 1, amount: 500, status: 'preparing' });
+type Job = {
+  city: string;
+  company: string;
+  position: string;
+  salary: number;
+  currency: string;
+};
 
-printOrder({ id: 6, amount: 2000, status: 'delivering' });
+const generateRandomUser = (): User => {
+  return {
+    id: faker.number.int({ min: 1, max: 100 }),
+    name: faker.person.firstName(),
+    age: faker.number.int({ min: 1, max: 100 }),
+    address: faker.location.streetAddress(),
+    animal: {
+      name: faker.person.firstName(),
+      species: faker.animal.type(),
+      breed: faker.animal.dog(),
+    },
+    job: {
+      city: faker.location.city(),
+      company: faker.company.name(),
+      position: faker.person.jobTitle(),
+      salary: faker.number.int({ min: 20000, max: 200000 }),
+      currency: faker.finance.currencyCode(),
+    },
+  };
+};
+console.log(generateRandomUser());
