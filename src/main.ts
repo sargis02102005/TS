@@ -1,46 +1,32 @@
-import { faker } from '@faker-js/faker';
+import chalk from 'chalk';
 
-type User = {
+type statusOrder = 'pending' | 'preparing' | 'delivering' | 'completed';
+
+type Order = {
   id: number;
-  name: string;
-  age: number;
-  address: string;
-  animal: Animal;
-  job: Job;
+  amount: number;
+  status: statusOrder;
 };
 
-type Animal = {
-  name: string;
-  species: string;
-  breed: string;
+const printOrder = (order: Order) => {
+  let message: string;
+
+  switch (order.status) {
+    case 'pending':
+      message = chalk.yellow('Ожидает обработки');
+      break;
+    case 'preparing':
+      message = chalk.cyan('Готовится!');
+      break;
+    case 'delivering':
+      message = chalk.blue('Доставка!');
+      break;
+    default:
+      message = chalk.green('Выполнен!');
+  }
+  console.log(`Заказ #${order.id}: ${message}`);
 };
 
-type Job = {
-  city: string;
-  company: string;
-  position: string;
-  salary: number;
-  currency: string;
-};
+printOrder({ id: 1, amount: 500, status: 'preparing' });
 
-const generateRandomUser = (): User => {
-  return {
-    id: faker.number.int({ min: 1, max: 100 }),
-    name: faker.person.firstName(),
-    age: faker.number.int({ min: 1, max: 100 }),
-    address: faker.location.streetAddress(),
-    animal: {
-      name: faker.person.firstName(),
-      species: faker.animal.type(),
-      breed: faker.animal.dog(),
-    },
-    job: {
-      city: faker.location.city(),
-      company: faker.company.name(),
-      position: faker.person.jobTitle(),
-      salary: faker.number.int({ min: 20000, max: 200000 }),
-      currency: faker.finance.currencyCode(),
-    },
-  };
-};
-console.log(generateRandomUser());
+printOrder({ id: 6, amount: 2000, status: 'delivering' });
