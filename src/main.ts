@@ -12,47 +12,36 @@
 
 Пример использования:
 */
+
 const joinWithCase = (words: string[], usingCase: string) => {
-  let wordstest = '';
-  let i = 0;
+  let result = '';
 
-  if (usingCase === 'snake_case') {
-    for (const item of words) {
-      wordstest += item.toLowerCase();
-      if (i < words.length - 1) {
-        wordstest += '_';
-        i++;
-      }
-    }
-  }
-
-  if (usingCase === 'kebab-case') {
-    for (const item of words) {
-      wordstest += item.toLowerCase();
-      if (i < words.length - 1) {
-        wordstest += '-';
-        i++;
-      }
-    }
+  if (usingCase === 'snake_case' || usingCase === 'kebab-case') {
+    const symbol = usingCase === 'snake_case' ? '_' : '-';
+    return words.join(symbol).toLowerCase();
   }
 
   if (usingCase === 'PascalCase') {
     for (const item of words) {
-      wordstest += item[0].toUpperCase() + item.slice(1).toLowerCase();
+      result += item[0].toUpperCase() + item.slice(1).toLowerCase();
     }
+    return result;
   }
 
   if (usingCase === 'camelCase') {
     for (const item of words) {
-      if (wordstest.length === 0) {
-        wordstest += item.toLowerCase();
+      if (result.length === 0) {
+        result += item.toLowerCase();
       } else {
-        wordstest += item[0].toUpperCase() + item.slice(1).toLowerCase();
+        result += item[0].toUpperCase() + item.slice(1).toLowerCase();
       }
     }
+    return result;
   }
-  return wordstest;
+  return 'Ошибка, такова вида регистра не существует!';
 };
+
+console.log(joinWithCase(['хочу', 'соединить', 'эти', 'пять', 'слов'], 'pascal_case'));
 
 const testCase1 = ['path'];
 
