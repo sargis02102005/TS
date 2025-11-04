@@ -1,65 +1,56 @@
-/*
+import { faker } from '@faker-js/faker';
 
-Напишите функцию joinWithCase(words, usingCase), которая получает на вход 2 аргумента:
-1. words - массив слов, которые необходимо объединить в одно слово
-2. usingCase - название регистра, используя который необходимо объединить слова в одно
-
-Функция должна поддерживать 4 вида регистров:
-* PascalCase - первое и каждое новое слово с большой буквы
-* camelCase - первое слово с маленькой буквы, каждое следующее с большой
-* snake_case - каждое слово маленькими буквами через нижнее подчеркивание
-* kebab-case - каждое слово маленькими буквами через тире
-
-Пример использования:
-*/
-
-const joinWithCase = (words: string[], usingCase: string) => {
-  let result = '';
-
-  if (usingCase === 'snake_case' || usingCase === 'kebab-case') {
-    const symbol = usingCase === 'snake_case' ? '_' : '-';
-    return words.join(symbol).toLowerCase();
-  }
-
-  if (usingCase === 'PascalCase') {
-    for (const item of words) {
-      result += item[0].toUpperCase() + item.slice(1).toLowerCase();
-    }
-    return result;
-  }
-
-  if (usingCase === 'camelCase') {
-    for (const item of words) {
-      if (result.length === 0) {
-        result += item.toLowerCase();
-      } else {
-        result += item[0].toUpperCase() + item.slice(1).toLowerCase();
-      }
-    }
-    return result;
-  }
-  return 'Ошибка, такова вида регистра не существует!';
+type User = {
+  id: number;
+  email: string;
+  password: string;
+  role: UserRole;
 };
 
-console.log(joinWithCase(['хочу', 'соединить', 'эти', 'пять', 'слов'], 'pascal_case'));
+enum UserRole {
+  ADMIN = 'admin',
+  GUEST = 'guest',
+  MANAGER = 'manager',
+  MODERATOR = 'moderator',
+}
 
-const testCase1 = ['path'];
+const generateRandomUser = (n: number) => {
+  const users = [];
 
-console.log(joinWithCase(testCase1, 'PascalCase')); // Path
-console.log(joinWithCase(testCase1, 'camelCase')); // path
-console.log(joinWithCase(testCase1, 'snake_case')); // path
-console.log(joinWithCase(testCase1, 'kebab-case')); // path
+  for (let i = 0; i < n; i++) {
+    const user: User = {
+      id: faker.number.int({ min: 1, max: 1000 }),
+      email: faker.internet.email(),
+      password: faker.internet.password(),
+      role: faker.helpers.arrayElement(Object.values(UserRole)),
+    };
+    users.push(user);
+  }
 
-const testCase2 = ['favorite', 'COLOR'];
+  return users;
+};
 
-console.log(joinWithCase(testCase2, 'PascalCase')); // FavoriteColor
-console.log(joinWithCase(testCase2, 'camelCase')); // favoriteColor
-console.log(joinWithCase(testCase2, 'snake_case')); // favorite_color
-console.log(joinWithCase(testCase2, 'kebab-case')); // favorite-color
+const filterByRole = (users: User[], role: UserRole) => {
+  return users.filter((user) => user.role === role);
+};
 
-const testCase3 = ['uSEr', 'FIRST', 'Login', 'dATE'];
+const randomUsers = generateRandomUser(10);
+console.log('Все пользователи:', randomUsers.length);
 
-console.log(joinWithCase(testCase3, 'PascalCase')); // UserFirstLoginDate
-console.log(joinWithCase(testCase3, 'camelCase')); // userFirstLoginDate
-console.log(joinWithCase(testCase3, 'snake_case')); // user_first_login_date
-console.log(joinWithCase(testCase3, 'kebab-case')); // user-first-login-date
+const admins = filterByRole(randomUsers, UserRole.ADMIN);
+console.log(`Админы (${admins.length}):`, admins);
+
+const guests = filterByRole(randomUsers, UserRole.GUEST);
+console.log(`Гости (${guests.length}):`, guests);
+
+const managers = filterByRole(randomUsers, UserRole.MANAGER);
+console.log(`Менеджеры (${managers.length}):`, managers);
+
+const moderators = filterByRole(randomUsers, UserRole.MODERATOR);
+console.log(`Модераторы (${moderators.length}):`, moderators);
+
+console.log(`Статистика по ролям: 
+Админы:${admins.length}
+Гости:${guests.length}
+Менеджеры:${managers.length}
+Модераторы:${moderators.length}`);
