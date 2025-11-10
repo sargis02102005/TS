@@ -1,90 +1,37 @@
 /*
-Дано:
-Больница, имеющая список палат, в каждой палате список пациентов.
+Напишите функцию separate, которая принимает на вход одну строку, и делит её на слова, согласно найденному регистру
+При этом функция должна автоматически определять регистр.
 
-Каждая палата содержит информацию о:
-* Номер палаты
-* Список пациентов
-
-Каждый пациент содержит информацию о:
-* Своём имени
-* Температуре
-
-Ваша задача, вывести список палат с указанием средней температуры в каждой палате,
-а так же с указанием средней температуры по всей больнице.
-
+ГАРАНТИРУЕТСЯ! Что полученная на вход строка написано в каком-то конкретном регистре, и коллизий нет!
+Например, строка "Это_что-такое" - непонятно написано в snake или kebab,
+или строка "НачалоКонец_Середина" - тоже непонятно это Pascal или kebab.
+👆 Вот таких вводов НЕ БУДЕТ! Их отдельно обрабатывать не нужно! Полученная на вход строка всегда в конкретном понятном регистре!
 */
 
-type Patient = {
-  // описать тип
-  name: string;
-  temp: number;
-};
-
-type Room = {
-  // описать тип
-  name: string;
-  patients: Patient[];
-};
-
-// По всей больнице средняя температура 37.792 (пустые палаты в расчет не идут, температура округлена до 3х знаков после запятой)
-const hospital: Room[] = [
-  {
-    name: 'A-123', // Средняя температура 36.6
-    patients: [
-      { name: 'Мария', temp: 36.8 },
-      { name: 'Валентин', temp: 36.4 },
-    ],
-  },
-  {
-    name: 'B-093', // Средняя температура 40
-    patients: [{ name: 'Алексей', temp: 40.0 }],
-  },
-  {
-    name: 'C-107', // Средняя температура 0
-    patients: [],
-  },
-  {
-    name: 'D-246', // Средняя температура 36.775
-    patients: [
-      { name: 'Михаил', temp: 34.9 },
-      { name: 'Анатолий', temp: 38.9 },
-      { name: 'Гарик', temp: 37 },
-      { name: 'Антон', temp: 36.3 },
-    ],
-  },
-];
-
-const calculateTemperature = (rooms: Room[]) => {
-  let sumTemp = 0;
-  let sumCount = 0;
-  for (const room of rooms) {
-    if (room.patients.length === 0) {
-      continue;
-    }
-    let result = 0;
-
-    for (const patient of room.patients) {
-      result += patient.temp;
-      sumTemp += patient.temp;
-    }
-    sumCount += room.patients.length;
-    const roomAverage = result / room.patients.length;
-    const roundedRoomAverage = Math.round(roomAverage * 1000) / 1000;
-
-    console.log(`Палата ${room.name}: ${roundedRoomAverage} C`);
+const separate = (text: string) => {
+  if (text.includes('_') || text.includes('-')) {
+    const len = text.includes('_') ? '_' : '-';
+    return text.split(len);
   }
-  const roomhospital = sumTemp / sumCount;
-  const roundedHospitalAverage = Math.round(roomhospital * 1000) / 1000;
 
-  console.log(`Вся больница: ${roundedHospitalAverage} C`);
+  const result = [];
+  let start = 0;
+  for (let i = 1; i < text.length; i++) {
+    if (text[i].toUpperCase() === text[i]) {
+      result.push(text.slice(start, i));
+      start = i;
+    }
+  }
+
+  result.push(text.slice(start));
+
+  return result;
 };
 
-calculateTemperature(hospital);
-// Ожидаемый вывод программы:
-/*
-Палата [A-123]: 36.6 C
-Палата [B-093]: 40 C
-Палата [D-246]: 36.775 C
-Вся больница: 37.792 C
-*/
+console.log(separate('это_слово_в_snake_case')); // ["это", "слово", "в", "snake", "case"] (использовался snake_case)
+console.log(separate('КрасныйХолодильник')); // ["Красный", "Холодильник"] (использовался PascalCase)
+console.log(separate('зелёныйСигналСветофора')); // ["зеленый", "Сигнал", "Светофора"] (использовался camelCase)
+console.log(separate('шампур-с-мясом')); // ["шампур", "с", "мясом"] (использовался kebab-case)
+
+// "привет это я".split(" ") => [привет, это, я]
+// "шампур-с-картошкой".split("-") => [шампур, с, картошкой]
