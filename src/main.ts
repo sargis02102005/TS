@@ -1,37 +1,15 @@
-/*
-Напишите функцию separate, которая принимает на вход одну строку, и делит её на слова, согласно найденному регистру
-При этом функция должна автоматически определять регистр.
-
-ГАРАНТИРУЕТСЯ! Что полученная на вход строка написано в каком-то конкретном регистре, и коллизий нет!
-Например, строка "Это_что-такое" - непонятно написано в snake или kebab,
-или строка "НачалоКонец_Середина" - тоже непонятно это Pascal или kebab.
-👆 Вот таких вводов НЕ БУДЕТ! Их отдельно обрабатывать не нужно! Полученная на вход строка всегда в конкретном понятном регистре!
-*/
-
-const separate = (text: string) => {
-  if (text.includes('_') || text.includes('-')) {
-    const len = text.includes('_') ? '_' : '-';
-    return text.split(len);
-  }
-
-  const result = [];
-  let start = 0;
-  for (let i = 1; i < text.length; i++) {
-    if (text[i].toUpperCase() === text[i]) {
-      result.push(text.slice(start, i));
-      start = i;
-    }
-  }
-
-  result.push(text.slice(start));
-
-  return result;
+type User = {
+  name: string;
+  email?: string | null;
 };
 
-console.log(separate('это_слово_в_snake_case')); // ["это", "слово", "в", "snake", "case"] (использовался snake_case)
-console.log(separate('КрасныйХолодильник')); // ["Красный", "Холодильник"] (использовался PascalCase)
-console.log(separate('зелёныйСигналСветофора')); // ["зеленый", "Сигнал", "Светофора"] (использовался camelCase)
-console.log(separate('шампур-с-мясом')); // ["шампур", "с", "мясом"] (использовался kebab-case)
+const users: User[] = [
+  { name: 'Алексей' },
+  { name: 'Мария', email: null },
+  { name: 'Иван', email: '' },
+  { name: 'Елена', email: 'elena@example.com' },
+];
 
-// "привет это я".split(" ") => [привет, это, я]
-// "шампур-с-картошкой".split("-") => [шампур, с, картошкой]
+console.log(
+  `${(users[0].email ?? 'не обнаружено') || 'пусто'} ${(users[1].email ?? 'не обнаружено') || 'пусто'} ${(users[2].email ?? 'не обнаружено') || 'пусто'} ${(users[3].email ?? 'не обнаружено') || 'пусто'}`,
+);
