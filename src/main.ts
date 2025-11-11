@@ -1,15 +1,4 @@
-type User = {
-  name: string;
-  email?: string | null;
-};
+//                                                            0
+const a = ('' || null || 0 || -0 || undefined) ?? (null || 0) ?? '' ?? null;
 
-const users: User[] = [
-  { name: 'Алексей' },
-  { name: 'Мария', email: null },
-  { name: 'Иван', email: '' },
-  { name: 'Елена', email: 'elena@example.com' },
-];
-
-console.log(
-  `${(users[0].email ?? 'не обнаружено') || 'пусто'} ${(users[1].email ?? 'не обнаружено') || 'пусто'} ${(users[2].email ?? 'не обнаружено') || 'пусто'} ${(users[3].email ?? 'не обнаружено') || 'пусто'}`,
-);
+console.log(a);
