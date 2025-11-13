@@ -1,70 +1,62 @@
-/*
-Вам дан отдел с сотрудниками, у каждого сотрудника есть имя и его зарплата.
-Ваша задача написать ф-цию analyze, которая получается на вход отдел и определияе на сколько % отличается зарплата
- между самой низкой и самой высокой.
+// Регистрация -> в БД добавляется новый объект пользователя (с указанием его почты, пароля, имени)
 
-Пример сообщения:
-В отделе "Бухгалтерия" самая высокая зарплата у "Иван" - 80 тыс рублей, что на +60% больше, чем зарплата "Елена" - 50 тыс рублей.
+// register({ name: "Алексей", email: "alex@mail.ru", password: "alex123" })
+// Ф-ция register должна сохранить этого пользователя в базу (добавить в массив database)
 
-*/
+// login({ email: "alex@mail.ru", password: "a1a1a1a1" }) => Пароль неверный!
+// login({ email: "alex@mail.ru", password: "alex123" }) => Добрый день, Алексей!
+// Ф-ция login должна принимать на вход - почту и пароль, искать в БД пользователя с такой почтой,
+// далее, если пароль правильный - выводить приветствие, если неправильный - выводить сообщение об этом.
+// Описать типы - User, RegisterData, LoginData
 
-type Person = {
-  // опишите
+type User = {
   name: string;
-  salary: number;
+  email: string;
+  password: string;
 };
 
-type Department = {
-  // опишите
-  title: string;
-  persons: Person[];
+type RegisterData = User;
+
+type LoginData = {
+  email: string;
+  password: string;
 };
 
-const analyze = (depar: Department) => {
-  let max = depar.persons[0];
-  let min = depar.persons[0];
-  for (const person of depar.persons) {
-    if (person.salary > max.salary) {
-      max = person;
-    }
+const database: User[] = [];
 
-    if (person.salary < min.salary) {
-      min = person;
+const register = (data: RegisterData) => {
+  for (const item of database) {
+    if (item.email === data.email) {
+      return false;
     }
   }
-
-  const diff = Math.round(((max.salary - min.salary) / min.salary) * 100);
-
-  console.log(
-    `В отделе ${depar.title} самая высокая зарплата у ${max.name} - ${max.salary / 1000} тыс рублей, что на ${diff}% больше, чем зарплата "${min.name}" - ${min.salary / 1000} тыс рублей.`,
-  );
+  return database.push(data);
 };
 
-const dep1: Department = {
-  title: 'Бухгалтерия',
-  persons: [
-    { name: 'Иван', salary: 80000 },
-    { name: 'Михаил', salary: 72500 },
-    { name: 'Олег', salary: 65000 },
-    { name: 'Елена', salary: 50000 },
-  ],
+const login = (data: LoginData) => {
+  for (const item of database) {
+    if (item.email === data.email) {
+      if (item.password === data.password) {
+        console.log(`Добрый день, ${item.name}!`);
+      } else {
+        console.log('Пароль неверный!');
+      }
+      return;
+    }
+  }
+  console.log('Пользователь с такой почтой не найден!');
 };
 
-analyze(dep1); // В отделе "Бухгалтерия" самая высокая зарплата у "Иван" - 80 тыс рублей, что на +60% больше, чем зарплата "Елена" - 50 тыс рублей.
+register({ name: 'Алексей', email: 'alex@mail.ru', password: 'alex123' });
 
-const dep2: Department = {
-  title: 'Столовая',
-  persons: [{ name: 'Валентин', salary: 280000 }],
-};
+register({ name: 'Алексей Дубль', email: 'alex@mail.ru', password: 'qwerty' });
 
-analyze(dep2); // В отделе "Столовая" самая высокая зарплата у "Валентин" - 280 тыс рублей, что на +0% больше, чем зарплата "Валентин" - 280 тыс рублей.
+login({ email: 'alex@mail.ru', password: 'alex123' });
 
-const dep3: Department = {
-  title: 'Столовая',
-  persons: [
-    { name: 'Саша', salary: 101800 },
-    { name: 'Маша', salary: 100000 },
-  ],
-};
+login({ email: 'alex@mail.ru', password: 'a1a1a1a1' });
 
-analyze(dep3); // В отделе "Столовая" самая высокая зарплата у "Саша" - 101.8 тыс рублей, что на +1.8% больше, чем зарплата "Маша" - 100 тыс рублей.
+login({ email: 'unknown@mail.ru', password: '123456' });
+
+register({ name: 'Мария', email: 'maria@mail.ru', password: 'maria456' });
+
+login({ email: 'maria@mail.ru', password: 'maria456' });
