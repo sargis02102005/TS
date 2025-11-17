@@ -1,62 +1,45 @@
-// Регистрация -> в БД добавляется новый объект пользователя (с указанием его почты, пароля, имени)
+import { faker } from '@faker-js/faker';
 
-// register({ name: "Алексей", email: "alex@mail.ru", password: "alex123" })
-// Ф-ция register должна сохранить этого пользователя в базу (добавить в массив database)
-
-// login({ email: "alex@mail.ru", password: "a1a1a1a1" }) => Пароль неверный!
-// login({ email: "alex@mail.ru", password: "alex123" }) => Добрый день, Алексей!
-// Ф-ция login должна принимать на вход - почту и пароль, искать в БД пользователя с такой почтой,
-// далее, если пароль правильный - выводить приветствие, если неправильный - выводить сообщение об этом.
-// Описать типы - User, RegisterData, LoginData
+const possibleTasks = ['Купить кота', 'Продать кота', 'Помыть кота', 'Купить арбуз'];
 
 type User = {
-  name: string;
+  id: string; // nanoid длиной 6 символов, используйте faker.string.nanoid
+  name: string; // обязательно русское
   email: string;
-  password: string;
+  company: string; // название компании (использовать .company)
+  tasks: string[]; // От 0 до 2х рандомных задач из массива possibleTasks (взять используя faker.helpers)
 };
 
-type RegisterData = User;
+const generateUsers = () => {
+  const Count = faker.number.int({ min: 3, max: 6 });
+  const users: User[] = [];
 
-type LoginData = {
-  email: string;
-  password: string;
-};
+  for (let i = 0; i < Count; i++) {
+    const taskCount = faker.number.int({ min: 0, max: 2 });
+    const randomTasks = faker.helpers.arrayElements(possibleTasks, taskCount);
 
-const database: User[] = [];
+    const user: User = {
+      id: faker.string.nanoid(6),
+      name: faker.person.fullName(),
+      email: faker.internet.email(),
+      company: faker.company.name(),
+      tasks: randomTasks,
+    };
 
-const register = (data: RegisterData) => {
-  for (const item of database) {
-    if (item.email === data.email) {
-      return false;
-    }
+    users.push(user);
   }
-  return database.push(data);
+
+  return users;
 };
 
-const login = (data: LoginData) => {
-  for (const item of database) {
-    if (item.email === data.email) {
-      if (item.password === data.password) {
-        console.log(`Добрый день, ${item.name}!`);
-      } else {
-        console.log('Пароль неверный!');
-      }
-      return;
-    }
+// Функция для форматирования списка дел пользователя
+const formatUserTasks = (user: User[]) => {
+  for (const task of user) {
+    const Count = task.tasks.length;
+    const Text = Count === 0 ? 'Нет' : `${Count}`;
+
+    console.log(`Пользователь "${task.name}" (id="${task.id}"): ${Text} дел на сегодня`);
   }
-  console.log('Пользователь с такой почтой не найден!');
 };
 
-register({ name: 'Алексей', email: 'alex@mail.ru', password: 'alex123' });
-
-register({ name: 'Алексей Дубль', email: 'alex@mail.ru', password: 'qwerty' });
-
-login({ email: 'alex@mail.ru', password: 'alex123' });
-
-login({ email: 'alex@mail.ru', password: 'a1a1a1a1' });
-
-login({ email: 'unknown@mail.ru', password: '123456' });
-
-register({ name: 'Мария', email: 'maria@mail.ru', password: 'maria456' });
-
-login({ email: 'maria@mail.ru', password: 'maria456' });
+formatUserTasks(generateUsers());
