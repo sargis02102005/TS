@@ -1,111 +1,45 @@
-import { faker } from '@faker-js/faker'; // Добавляем импорт faker
-import { createHash } from 'node:crypto'; // <= показывает Ошибку
-/*
-C:\Users\PC\AppData\Roaming\npm\node_modules\ts-node\src\index.ts:859
-    return new TSError(diagnosticText, diagnosticCodes, diagnostics);
-           ^
-TSError: ⨯ Unable to compile TypeScript:
-src/main.ts:2:28 - error TS2307: Cannot find module 'node:crypto' or its corresponding type declarations.
+import { faker, fakerRU } from '@faker-js/faker';
 
-2 import { createHash } from 'node:crypto'; // <= показывает Ошибку
-                             ~~~~~~~~~~~~~
-
-    at createTSError (C:\Users\PC\AppData\Roaming\npm\node_modules\ts-node\src\index.ts:859:12)
-    at reportTSError (C:\Users\PC\AppData\Roaming\npm\node_modules\ts-node\src\index.ts:863:19)
-    at getOutput (C:\Users\PC\AppData\Roaming\npm\node_modules\ts-node\src\index.ts:1077:36)
-    at Object.compile (C:\Users\PC\AppData\Roaming\npm\node_modules\ts-node\src\index.ts:1433:41)
-    at Module.m._compile (C:\Users\PC\AppData\Roaming\npm\node_modules\ts-node\src\index.ts:1617:30)
-    at node:internal/modules/cjs/loader:1895:10
-    at Object.require.extensions.<computed> [as .ts] (C:\Users\PC\AppData\Roaming\npm\node_modules\ts-node\src\index.ts:1621:12)
-    at Module.load (node:internal/modules/cjs/loader:1465:32)
-    at Function._load (node:internal/modules/cjs/loader:1282:12)
-    at TracingChannel.traceSync (node:diagnostics_channel:322:14) {
-  diagnosticCodes: [ 2307 ]
-}
-
- */
-
-function generateHash(rawText: string): string {
-  return createHash('sha256').update(rawText).digest('hex');
-}
+const possibleTasks = ['Купить кота', 'Продать кота', 'Помыть кота', 'Купить арбуз'];
 
 type User = {
-  id: string; // Изменяем на string, т.к. используем nanoid
-  name: string;
+  id: string; // nanoid длиной 6 символов, используйте faker.string.nanoid
+  name: string; // обязательно русское
   email: string;
-  password: string;
-  incorrectPasswordTries?: number; // Добавляем опциональное поле
+  company: string; // название компании (использовать .company)
+  tasks: string[]; // От 0 до 2х рандомных задач из массива possibleTasks (взять используя faker.helpers)
 };
 
-type RegisterData = Omit<User, 'id'>; // Исключаем id, т.к. генерируется автоматически
+const generateUsers = () => {
+  const Count = faker.number.int({ min: 3, max: 6 });
+  const users: User[] = [];
 
-type LoginData = {
-  email: string;
-  password: string;
+  for (let i = 0; i < Count; i++) {
+    const taskCount = faker.number.int({ min: 0, max: 2 });
+    const randomTasks = faker.helpers.arrayElements(possibleTasks, taskCount);
+
+    const user: User = {
+      id: faker.string.nanoid(6),
+      name: fakerRU.person.fullName(),
+      email: faker.internet.email(),
+      company: faker.company.name(),
+      tasks: randomTasks,
+    };
+
+    users.push(user);
+  }
+
+  return users;
 };
 
-const database: User[] = [];
+// Функция для форматирования списка дел пользователя
+const formatUserTasks = (user: User[]) => {
+  for (const task of user) {
+    const Count = task.tasks.length;
+    const Text = Count === 0 ? 'Нет' : `${Count}`;
 
-const register = (data: RegisterData) => {
-  const { name, email, password: rawPassword } = data;
-
-  for (const item of database) {
-    if (item.email === data.email) {
-      console.log(`Пользователь с email ${email} уже существует!`);
-      return;
-    }
-
-    const id = faker.string.nanoid();
-    const password = generateHash(rawPassword);
-
-    database.push({
-      id,
-      name,
-      email,
-      password,
-      incorrectPasswordTries: 0,
-    });
-
-    console.log(`Пользователь ${name} успешно зарегистрирован!`);
+    console.log(`Пользователь "${task.name}" (id="${task.id}"): ${Text} дел на сегодня`);
   }
 };
 
-const login = (data: LoginData) => {
-  const { email, password } = data;
-
-  for (const user of database) {
-    if (user.email === email) {
-      const passwordCorrect = generateHash(password) === user.password;
-
-      if (passwordCorrect) {
-        console.log(`Добро пожаловать, ${user.name}`);
-      } else {
-        if (user.incorrectPasswordTries === 3) {
-          console.log('Вы заблокированы!');
-        } else if (user.incorrectPasswordTries === 2) {
-          console.log('Неверный пароль! Вы заблокированы!');
-          user.incorrectPasswordTries++;
-        } else {
-          console.log('Неверный пароль!');
-        }
-      }
-
-      return;
-    }
-  }
-  console.log('Пользователь не найден!');
-};
-
-register({ name: 'Алексей', email: 'alex@mail.ru', password: 'alex123' });
-
-register({ name: 'Алексей Дубль', email: 'alex@mail.ru', password: 'qwerty' });
-
-login({ email: 'alex@mail.ru', password: 'alex123' });
-
-login({ email: 'alex@mail.ru', password: 'a1a1a1a1' });
-
-login({ email: 'unknown@mail.ru', password: '123456' });
-
-register({ name: 'Мария', email: 'maria@mail.ru', password: 'maria456' });
-
-login({ email: 'maria@mail.ru', password: 'maria456' });
+formatUserTasks(generateUsers());
