@@ -1,45 +1,29 @@
-import { faker, fakerRU } from '@faker-js/faker';
+/*
 
-const possibleTasks = ['Купить кота', 'Продать кота', 'Помыть кота', 'Купить арбуз'];
+Написать ф-цию, которая принимает на вход 2 массива, а возвращает true/false - обратные ли они друг другу
 
-type User = {
-  id: string; // nanoid длиной 6 символов, используйте faker.string.nanoid
-  name: string; // обязательно русское
-  email: string;
-  company: string; // название компании (использовать .company)
-  tasks: string[]; // От 0 до 2х рандомных задач из массива possibleTasks (взять используя faker.helpers)
-};
 
-const generateUsers = () => {
-  const Count = faker.number.int({ min: 3, max: 6 });
-  const users: User[] = [];
+[1,2,3] и [3,2,1] => true
+[90, 80, 90] и [90, 80, 90] => true
+[1,2,3,4,5,6,7,8,9,0] и [0,9,8,7,6,5,4,3,2,1] => true
+[4,5] и [5,4] => true
 
-  for (let i = 0; i < Count; i++) {
-    const taskCount = faker.number.int({ min: 0, max: 2 });
-    const randomTasks = faker.helpers.arrayElements(possibleTasks, taskCount);
+[1, 2] и [1, 2] => false
 
-    const user: User = {
-      id: faker.string.nanoid(6),
-      name: fakerRU.person.fullName(),
-      email: faker.internet.email(),
-      company: faker.company.name(),
-      tasks: randomTasks,
-    };
-
-    users.push(user);
+*/
+const src = (a: number[], b: number[]) => {
+  if (a.length !== b.length) {
+    return false;
   }
 
-  return users;
-};
-
-// Функция для форматирования списка дел пользователя
-const formatUserTasks = (user: User[]) => {
-  for (const task of user) {
-    const Count = task.tasks.length;
-    const Text = Count === 0 ? 'Нет' : `${Count}`;
-
-    console.log(`Пользователь "${task.name}" (id="${task.id}"): ${Text} дел на сегодня`);
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] === b[b.length - 1 - i]) {
+      return true;
+    }
   }
+  return false;
 };
 
-formatUserTasks(generateUsers());
+console.log(src([1], [1]));
+console.log(src([1, 2, 3, 4, 5, 6, 7, 8, 9, 0], [0, 9, 8, 7, 6, 5, 4, 3, 2, 1]));
+console.log(src([1, 2, 3], [3, 2, 1]));
