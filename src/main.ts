@@ -1,129 +1,48 @@
-type User = {
-  id: number;
-  name?: string;
-  email: string;
-};
+/*
+Фраза
+the quick brown fox jumps over the lazy dog
 
-type Item = {
-  id: number;
-  name: string;
-  price: number;
-  count?: number; // Если count не указан, по умолчанию считать количество 1
-};
+содержит все буквы английского алфавита.
 
-type DiscountCard = {
-  id: number;
-  series: number;
-};
+Я перемешал обычный алфавит и создал свой алфавит, который замещает одни английские буквы другими. Вот та же самая фраза, но записанная с помощью нового алфавита:
+oak lgypb wited zts qgfch tuki oak mjrn xtv
+В данном примере буква t была изменена на o, буква h на a и так далее. Гарантируется отсутствие дубликатов, то есть одна буква нового алфавита соответствует строго одной букве старого алфавита и наоборот.
 
-type Order = {
-  id: number;
-  user: User | null;
-  card: DiscountCard | null;
-  items: Item[];
-};
+Используя эти данные, расшифруйте фразу ниже.
+ntg ajuk fjbydv vikjo citvikhh yd mkjidydv qjujhpiyco. ptdvijoh!
+you
 
-const f = (orders: Order[]) => {
-  if (orders.length === 0) {
-    console.log('Нет, заказа!');
-    return;
+Если в фразе встретились символы, которые не удалось декодировать - оставьте эти символы без изменения.
+
+Верное решение задачи должно показать человеко-читаемый понятный текст!
+
+
+ */
+
+const shifrs = () => {
+  const fraza = 'the quick brown fox jumps over the lazy dog';
+  const shif = 'oak lgypb wited zts qgfch tuki oak mjrn xtv';
+  const frazza = 'ntg ajuk fjbydv vikjo citvikhh yd mkjidydv qjujhpiyco. ptdvijoh!';
+
+  let relt = '';
+
+  let i = 0;
+
+  while (relt.length < frazza.length) {
+    let s = 0;
+    while (s < shif.length) {
+      if (frazza[i] === shif[s]) {
+        relt += fraza[s];
+        i++;
+      }
+      if (frazza[i] === '.' || frazza[i] === '!') {
+        relt += frazza[i];
+        i++;
+      }
+      s++;
+    }
   }
-
-  for (const order of orders) {
-    if (order.id) {
-      console.log(`Заказ #${order.id}`);
-    }
-
-    console.log('------------');
-
-    if (order.user) {
-      console.log(`Клиент:`);
-      console.log(`id: ${order.user.id}`);
-      console.log(`имя: ${order.user.name || 'Не указано'}`);
-      console.log(`email: ${order.user.email}`);
-    } else {
-      console.log('Клиент: Не указан');
-    }
-
-    console.log('------------');
-
-    if (order.card) {
-      console.log(`Скидочная карта:`);
-      console.log(`id: ${order.card.id}`);
-      console.log(`номер: ${order.card.series}`);
-    } else {
-      console.log('Скидочная карта: Не применена');
-    }
-
-    console.log('------------');
-
-    console.log('Список покупок:');
-    let totalItems = 0;
-    let totalPrice = 0;
-
-    for (const item of order.items) {
-      const count = item.count || 1;
-      const itemTotal = item.price * count;
-
-      console.log(`- ${item.name}  ${item.price} руб ${count}шт`);
-
-      totalItems += count;
-      totalPrice += itemTotal;
-    }
-    console.log('------------');
-    console.log(`Итого: ${totalItems} товаров на сумму ${totalPrice} руб.`);
-    console.log('\n');
-  }
+  console.log(relt);
 };
 
-const order: Order[] = [
-  {
-    id: 3,
-    user: {
-      id: 5,
-      email: 'example@domain.com',
-    },
-    card: null,
-    items: [
-      { id: 6, name: 'Хлеб', price: 75, count: 3 },
-      { id: 9, name: 'Вафли', price: 95.9, count: 1 },
-      { id: 12, name: 'Набор конфет', price: 350 },
-    ],
-  },
-];
-
-f(order);
-
-const order1: Order[] = [
-  {
-    id: 3,
-    user: null,
-    card: null,
-    items: [
-      { id: 6, name: 'Хлеб', price: 75, count: 3 },
-      { id: 9, name: 'Вафли', price: 95.9, count: 1 },
-      { id: 12, name: 'Набор конфет', price: 350 },
-    ],
-  },
-];
-
-f(order1);
-
-const order2: Order[] = [
-  {
-    id: 3,
-    user: {
-      id: 5,
-      name: 'Алексей',
-      email: 'example@domain.com',
-    },
-    card: { id: 8, series: 6374634 },
-    items: [
-      { id: 6, name: 'Хлеб', price: 75, count: 3 },
-      { id: 9, name: 'Вафли', price: 95.9, count: 1 },
-      { id: 12, name: 'Набор конфет', price: 350 },
-    ],
-  },
-];
-
-f(order2);
+shifrs();
