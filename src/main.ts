@@ -1,16 +1,23 @@
-const src = (a: number[], b: number[]) => {
-  if (a.length !== b.length) {
-    return false;
-  }
+const fraza = 'the quick brown fox jumps over the lazy dog';
+const shif = 'oak lgypb wited zts qgfch tuki oak mjrn xtv';
+const frazza = 'ntg ajuk fjbydv vikjo citvikhh yd mkjidydv qjujhpiyco. ptdvijoh!';
 
-  for (let i = 0; i < a.length; i++) {
-    if (a[i] !== b[b.length - 1 - i]) {
-      return false;
+let relt = '';
+
+let i = 0;
+
+while (relt.length < frazza.length) {
+  let s = 0;
+  while (s < shif.length) {
+    if (frazza[i] === shif[s]) {
+      relt += fraza[s];
+      i++;
     }
+    if (frazza[i] === '.' || frazza[i] === '!') {
+      relt += frazza[i];
+      i++;
+    }
+    s++;
   }
-  return true;
-};
-
-console.log(src([1], [1]));
-console.log(src([1, 2, 3, 4, 5, 6, 7, 8, 9, 0], [0, 9, 8, 7, 6, 5, 4, 3, 2, 1]));
-console.log(src([1, 2, 3], [3, 2, 1]));
+}
+console.log(relt);
