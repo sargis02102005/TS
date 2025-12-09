@@ -1,75 +1,96 @@
 /*
-Вам дан список станций, а так же 2 маршрута поезда.
+Создайте функцию downloadTimeCalculator, которая умеет рассчитывать время в секундах, необходимое для загрузки файла.
+Функция на вход принимает информацию о файле и информацию о скорости скачивания.
 
-Необходимо написать ф-цию, которая выводит номер, название маршрута и список станций по порядку
+--- Система измерений ---
+Для расчётов скорости и/или объёма выделяет две системы - двоичную и десятеричную, мы будем использовать последнюю.
+В десятеричной новая единица измерения означает 1000 предыдущих единиц:
+  * KB = 1000 B
+  * MB = 1000 KB
+  * GB = 1000 MB
+Эти единицы называются байты (B), килобайты (KB), мегабайты (MB), гигабайты (GB)
+
+--- Точность измерений ---
+Точность измерений - 1 секунда, считать миллисекунды не нужно.
+Кол-во секунд округляется наверх, то есть:
+* Если для скачивания нужно 0.00001 сек времени, то ответ должен быть 1 сек.
+* Если для скачивания нужно 1 час 1 минута 30.7349 сек времени, то ответ должен быть 3691 секунд.
+
+--- Рекомендация ---
+Не пытайтесь вместить весь алгоритм в одну функцию - код получится похожим на кашу.
+Создавайте столько дополнительных типов и вспомогательных функций, сколько посчитаете нужным.
+
+Например, моё решение потребовало:
+* 3 дополнительных типа
+* 3 дополнительные функции
+
+Да, вы не ошиблись, формулировка "создайте функцию X" разрешает создавать не только X,
+но и любую другую функцию Y, Z, C, D, которая вам может пригодиться.
+
+--- Тесты ---
+Внизу расположены тест-кейсы для проверки работоспособности вашей функции.
+
+В тест-кейсах лежит - файл, скорость, ожидаемый ответ.
+Тест-кейсы по очереди в цикле проверяют, что вызов вашей функции с этим файлом
+и этой скоростью даст ответ, который совпадает с ожидаемым.
  */
 
-type Station = {
-  // Описать ...
-  id: number;
+/**
+ * Конкретные тестовые кейсы
+ * Их редактировать запрещено!
+ * Дебажить, конечно же, можно.
+ */
+type Units = 'gb' | 'mb' | 'kb' | 'b';
+
+type FileInfo = {
   name: string;
+  size: number;
+  units: Units;
 };
 
-type Route = {
-  // Описать ...
-  id: number;
-  stationIds: number[];
+type SpeedInfo = {
+  speedPerSecond: number;
+  units: Units;
 };
 
-const stations: Station[] = [
-  { id: 9, name: 'Ростов-на-Дону' },
-  { id: 13, name: 'Москва' },
-  { id: 19, name: 'Санкт-петербург' },
-  { id: 2, name: 'Воронеж' },
-  { id: 7, name: 'Краснодар' },
-  { id: 55, name: 'Сочи' },
-  { id: 71, name: 'Адлер' },
-];
+const convertToBytes = (value: number, units: Units) => {
+  const powers = {
+    b: 0,
+    kb: 1,
+    mb: 2,
+    gb: 3,
+  };
 
-const route56: Route = {
-  id: 56,
-  stationIds: [19, 13, 2, 9, 7],
+  return value * Math.pow(1000, powers[units]);
 };
 
-const route9: Route = {
-  id: 9,
-  stationIds: [9, 7, 55, 71],
+const downloadTimeCalculator = (file: FileInfo, speed: SpeedInfo) => {
+  const fileSizeInBytes = convertToBytes(file.size, file.units);
+
+  const speedSizeInBytes = convertToBytes(speed.speedPerSecond, speed.units);
+
+  return Math.ceil(fileSizeInBytes / speedSizeInBytes);
 };
 
-const showRoute = (route: Route) => {
-  const relt = [];
+const testCases = [
+  [10000, { name: 'День рождения.mp4', size: 1, units: 'gb' }, { speedPerSecond: 100, units: 'kb' }],
+  [1024, { name: 'Отчёт.docx', size: 1023443, units: 'kb' }, { speedPerSecond: 1, units: 'mb' }],
+  [1, { name: 'Голосовое сообщение.mp3', size: 1, units: 'b' }, { speedPerSecond: 1000, units: 'gb' }],
+  [86402, { name: 'Корги.png', size: 100.45, units: 'mb' }, { speedPerSecond: 1162.6, units: 'b' }],
+  [100450000000, { name: 'GTA V', size: 100.45, units: 'gb' }, { speedPerSecond: 1, units: 'b' }],
+] as const;
 
-  for (const items of route.stationIds) {
-    for (const station of stations) {
-      if (items === station.id) {
-        relt.push(station.name);
-      }
-    }
-  }
-  console.log(`Поезд #${route.id} ${relt[0]} - ${relt[relt.length - 1]}`);
-  console.log('Остановки:');
-  for (let i = 1; i <= relt.length; i++) {
-    console.log(`${i}. ${relt[i - 1]}`);
-  }
-};
-
-showRoute(route56); // Должен быть вывод как ниже
-/*
-Поезд #56 Санкт-петербург - Краснодар
-Остановки:
-1. Санкт-петербург
-2. Москва
-3. Воронеж
-4. Ростов-на-Дону
-5. Краснодар
+/**
+ * Цикл для проверки каждого тест-кейса по очереди
  */
+for (const testCase of testCases) {
+  const [expected, file, speed] = testCase;
 
-showRoute(route9); // Должен быть вывод как ниже
-/*
-Поезд #9 Ростов-на-Дону - Адлер
-Остановки:
-1. Ростов-на-Дону
-2. Краснодар
-3. Сочи
-4. Адлер
- */
+  const result = downloadTimeCalculator(file, speed);
+
+  if (result === expected) {
+    console.log(`Расчеты верны для файла "${file.name}"! \tРезультат: ${result}  | Ожидаемый: ${expected}`);
+  } else {
+    console.log(`Расчеты НЕВЕРНЫ для файла "${file.name}"! \tРезультат: ${result}  | Ожидаемый: ${expected}`);
+  }
+}
