@@ -1,78 +1,109 @@
-type Units = 'gb' | 'mb' | 'kb' | 'b';
+/*
+Создать CRUD-функции для сущности User.
 
-type FileInfo = {
+CRUD это набор базовых функций для работы с какой-то сущностью:
+* Create - создание
+* Read - чтение по id
+* Update - обновить по id
+* Delete - удалить по id
+
+Create
+Ф-ция createUser(data) должна записать пользователя в database, а так же выдать ему случайный id, используя faker.string.nanoid длиной 5
+Возвращать она должна только что созданного пользователя
+
+Read
+Ф-ция getUserById(id) должна искать пользователя в database и отдавать либо найденного пользователя, либо null
+
+Update
+Ф-ция updateUserById(id, data) принимает на вход id и новые данные для обновления, и обновляет пользователя в database.
+Все поля во втором аргументе - опциональные, можно менять все поля User, кроме id
+
+Delete
+Ф-ция deleteUserById(id) принимает на вход id и возвращает true/false - удалось ли удалить пользователя из database:
+ * Он был в базе и успешно удален из базы - вернуть true
+ * Пользователя с таким id не было в базе - вернуть false
+
+При этом все функции должны обеспечивать безопасность данных, то есть не выводить пароль пользователя!
+
+
+Пример использования ниже:
+ */
+
+import { faker } from '@faker-js/faker';
+
+type User = {
+  // Описать тип
+  id: string;
   name: string;
-  size: number;
-  units: Units;
+  email: string;
+  password: string;
 };
 
-type SpeedInfo = {
-  speedPerSecond: number;
-  units: Units;
-};
+type CreateUserData = Record<'name' | 'email' | 'password', string>;
 
-const convertToBytes = (value: number, units: Units) => {
-  const powers = {
-    b: 0,
-    kb: 1,
-    mb: 2,
-    gb: 3,
+const database: User[] = [];
+
+const createUser = (user: CreateUserData) => {
+  database.push({
+    id: faker.string.uuid(),
+    ...user,
+  });
+  const data = database[database.length - 1];
+
+  return {
+    id: data.id,
+    name: data.name,
+    email: data.email,
   };
-
-  return value * Math.pow(1000, powers[units]);
 };
 
-const downloadTimeCalculator = (file: FileInfo, speed: SpeedInfo) => {
-  const fileSizeInBytes = convertToBytes(file.size, file.units);
-
-  const speedSizeInBytes = convertToBytes(speed.speedPerSecond, speed.units);
-
-  return Math.ceil(fileSizeInBytes / speedSizeInBytes);
+const getUserById = (id: string) => {
+  for (const user of database) {
+    if (user.id === id) {
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      };
+    }
+  }
+  return null;
 };
 
-/**
- * Первая итерация - просто посчитать сколько СЕКУНД будет скачиваться файл.
- * Например 30, или 100, или 3900, или 100450000000
- *
- * Вторая итерация - выводить ответ в днях, часах, минутах и секундах
- */
-
-const timeCalculator = (a: number) => {
-  const timeDays = Math.floor(a / (24 * 3600));
-
-  const timeHours = Math.floor((a % (24 * 3600)) / 3600);
-
-  const minutes = Math.floor((a % 3600) / 60);
-
-  const seconds = Math.floor(a % 60);
-
-  return { timeDays, timeHours, minutes, seconds };
+const updateUserById = (id: string, users: Record<'name', string>) => {
+  for (const user of database) {
+    if (user.id === id) {
+      user.name = users.name;
+    }
+  }
+  return null;
 };
 
-const testCases = [
-  [10000, { name: 'День рождения.mp4', size: 1, units: 'gb' }, { speedPerSecond: 100, units: 'kb' }],
-  [1024, { name: 'Отчёт.docx', size: 1023443, units: 'kb' }, { speedPerSecond: 1, units: 'mb' }],
-  [1, { name: 'Голосовое сообщение.mp3', size: 1, units: 'b' }, { speedPerSecond: 1000, units: 'gb' }],
-  [86402, { name: 'Корги.png', size: 100.45, units: 'mb' }, { speedPerSecond: 1162.6, units: 'b' }],
-  [100450000000, { name: 'GTA V', size: 100.45, units: 'gb' }, { speedPerSecond: 1, units: 'b' }],
-] as const;
+const deleteUserById = (id: string) => {
+  for (let i = 0; i < database.length; i++) {
+    if (database[i].id === id) {
+      database.splice(i, 1);
+      return true;
+    }
+  }
+  return false;
+};
 
-/**
- * Цикл для проверки каждого тест-кейса по очереди
- */
-for (const testCase of testCases) {
-  const [expected, file, speed] = testCase;
+// [CREATE] Создаём нового пользователя
+const maxim = createUser({ name: 'Maxim', email: 'maxim@mail.ru', password: '123' });
+console.log(maxim); // { id: 'SwoPd', name: 'Maxim', email: 'maxim@mail.ru' }   (id взят случайный, у вас он будет другой)
 
-  const result = downloadTimeCalculator(file, speed);
+// [READ] Ищем пользователя по id
+console.log(getUserById(maxim.id)); // { id: 'SwoPd', name: 'Maxim', email: 'maxim@mail.ru' } - находим его в database
 
-  const time = timeCalculator(result);
-  console.log(
-    `Файл ${file.name} будет скачиваться ${time.timeDays} дней ${time.timeHours} часов ${time.minutes} минут ${time.seconds} секунд`,
-  );
-}
-/* Файл День рождения.mp4 будет скачиваться 0 дней 2 часов 46 минут 40 секунд
-Файл Отчёт.docx будет скачиваться 0 дней 0 часов 17 минут 4 секунд
-Файл Голосовое сообщение.mp3 будет скачиваться 0 дней 0 часов 0 минут 1 секунд
-Файл Корги.png будет скачиваться 1 дней 0 часов 0 минут 2 секунд
-Файл GTA V будет скачиваться 1162615 дней 17 часов 46 минут 40 секунд
-*/
+// [UPDATE] Обновляем имя у пользователя с id=SwoPd
+updateUserById(maxim.id, { name: 'max' });
+// Ищем пользователя по id=SwoPd и находим его, у него в базе будет уже новое имя
+console.log(getUserById(maxim.id)); // { id: 'SwoPd', name: 'max', email: 'maxim@mail.ru' }
+
+// [DELETE] Удаляем пользователя по id=SwoPd
+console.log(deleteUserById(maxim.id)); // true
+// Ищем пользователя по такому id и ничего не находим
+console.log(getUserById(maxim.id)); // null
+// Повторно пытаемся удалить пользователя по id=SwoPd и удалено не проходит
+console.log(deleteUserById(maxim.id)); // false
