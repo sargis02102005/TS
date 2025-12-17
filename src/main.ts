@@ -1,109 +1,134 @@
 /*
-Создать CRUD-функции для сущности User.
+Напишите программу для снятия наличных денег из банкомата.
 
-CRUD это набор базовых функций для работы с какой-то сущностью:
-* Create - создание
-* Read - чтение по id
-* Update - обновить по id
-* Delete - удалить по id
+После 3х ПОДРЯД неверных вводов пин кода карта блокируется и дальнейшие операции с ней невозможны.
+Обратите внимание - именно ПОДРЯД, если человек ввёл PIN дважды неправильно, а потом правильно - счётчик обнуляется.
 
-Create
-Ф-ция createUser(data) должна записать пользователя в database, а так же выдать ему случайный id, используя faker.string.nanoid длиной 5
-Возвращать она должна только что созданного пользователя
+При успешном снятии денег необходимо вывести сумму снятия и оставшийся баланс.
+Сумма снятия реально должна списываться - баланс карты должен уменьшаться.
 
-Read
-Ф-ция getUserById(id) должна искать пользователя в database и отдавать либо найденного пользователя, либо null
+Если на карте недостаточно средств - выводите "Недостаточно средств"
+Если произошёл 3-й подряд ввод неверного PIN - выводите "Карта заблокирована"
+Если происходит операция с заблокированной или несуществующей картой - выводите "Карта не обслуживается"
 
-Update
-Ф-ция updateUserById(id, data) принимает на вход id и новые данные для обновления, и обновляет пользователя в database.
-Все поля во втором аргументе - опциональные, можно менять все поля User, кроме id
+Для вывода успешного сообщения используйте ф-цию logGreen, передав её как колбек внутрь ф-ции withdraw.
+Для вывода сообщения с ошибкой используйте ф-цию logRed, передав её как колбек внутрь ф-ции withdraw.
 
-Delete
-Ф-ция deleteUserById(id) принимает на вход id и возвращает true/false - удалось ли удалить пользователя из database:
- * Он был в базе и успешно удален из базы - вернуть true
- * Пользователя с таким id не было в базе - вернуть false
+Так же создайте типы для описания:
+* Card - описывает информацию о карте
+* CallbackFn - описывает переданные колбек функции
 
-При этом все функции должны обеспечивать безопасность данных, то есть не выводить пароль пользователя!
-
-
-Пример использования ниже:
+Часть данных вам уже дана.
+Вы должны повторить вывод программы так, как показано на скриншоте ниже.
  */
 
-import { faker } from '@faker-js/faker';
+type CallbackFn = (text: string) => void;
 
-type User = {
-  // Описать тип
-  id: string;
-  name: string;
-  email: string;
-  password: string;
+type Card = {
+  no: string;
+  pin: number;
+  balance: number;
+  badTries: number;
+  active: boolean;
 };
 
-type CreateUserData = Record<'name' | 'email' | 'password', string>;
+const database: Card[] = [
+  { no: '4276 1234 5678 9101', pin: 1234, balance: 15000, badTries: 0, active: true },
+  { no: '4214 5678 9101 1121', pin: 5678, balance: 23000, badTries: 0, active: true },
+  { no: '4376 1111 2222 3333', pin: 4321, balance: 5000, badTries: 0, active: true },
+  { no: '4276 4444 5555 6666', pin: 8765, balance: 12000, badTries: 0, active: true },
+  { no: '4214 7777 8888 9999', pin: 1357, balance: 32000, badTries: 0, active: true },
+];
 
-const database: User[] = [];
+const separator = () => console.log('----------------------\n');
 
-const createUser = (user: CreateUserData) => {
-  database.push({
-    id: faker.string.uuid(),
-    ...user,
-  });
-  const data = database[database.length - 1];
-
-  return {
-    id: data.id,
-    name: data.name,
-    email: data.email,
-  };
+const logRed: CallbackFn = (msg: string) => {
+  console.log(new Date().toISOString(), 'ERROR', msg);
 };
 
-const getUserById = (id: string) => {
-  for (const user of database) {
-    if (user.id === id) {
-      return {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-      };
+const logGreen: CallbackFn = (msg: string) => {
+  console.log(new Date().toISOString(), 'INFO', msg);
+};
+
+const withdraw = (no: string, pin: number, amount: number, success: CallbackFn, error: CallbackFn) => {
+  const badTriesLimitForBlock = 3;
+
+  let foundCard: Card | null = null;
+
+  // Ищем карту по неё номеру
+  for (const card of database) {
+    if (card.no === no) {
+      foundCard = card;
+      break;
     }
   }
-  return null;
-};
 
-const updateUserById = (id: string, users: Record<'name', string>) => {
-  for (const user of database) {
-    if (user.id === id) {
-      user.name = users.name;
-    }
+  // Если карты или она заблокирована
+  if (!foundCard || !foundCard.active) {
+    error('Карта не обслуживается!');
+    return;
   }
-  return null;
-};
 
-const deleteUserById = (id: string) => {
-  for (let i = 0; i < database.length; i++) {
-    if (database[i].id === id) {
-      database.splice(i, 1);
-      return true;
+  // Если PIN неверный
+  if (foundCard.pin !== pin) {
+    foundCard.badTries++;
+
+    // Если это НЕ 3-я попытка подряд
+    if (foundCard.badTries <= badTriesLimitForBlock) {
+      error('PIN неверный!');
+    } else {
+      // Если это 3-я попытка подряд
+      error('Карта заблокирована!');
+      foundCard.active = false;
     }
+
+    return;
   }
-  return false;
-};
 
-// [CREATE] Создаём нового пользователя
-const maxim = createUser({ name: 'Maxim', email: 'maxim@mail.ru', password: '123' });
-console.log(maxim); // { id: 'SwoPd', name: 'Maxim', email: 'maxim@mail.ru' }   (id взят случайный, у вас он будет другой)
+  // PIN верный, обнуляем попытки
+  foundCard.badTries = 0;
 
-// [READ] Ищем пользователя по id
-console.log(getUserById(maxim.id)); // { id: 'SwoPd', name: 'Maxim', email: 'maxim@mail.ru' } - находим его в database
+  // Недостаточно средств
+  if (foundCard.balance < amount) {
+    error('Недостаточно средств!');
+    return;
+  }
 
-// [UPDATE] Обновляем имя у пользователя с id=SwoPd
-updateUserById(maxim.id, { name: 'max' });
-// Ищем пользователя по id=SwoPd и находим его, у него в базе будет уже новое имя
-console.log(getUserById(maxim.id)); // { id: 'SwoPd', name: 'max', email: 'maxim@mail.ru' }
+  // Уменьшаем баланс
+  foundCard.balance -= amount;
 
-// [DELETE] Удаляем пользователя по id=SwoPd
-console.log(deleteUserById(maxim.id)); // true
-// Ищем пользователя по такому id и ничего не находим
-console.log(getUserById(maxim.id)); // null
-// Повторно пытаемся удалить пользователя по id=SwoPd и удалено не проходит
-console.log(deleteUserById(maxim.id)); // false
+  // Выводим сообщение
+  success(`Снятие наличных ${amount} руб. Баланс: ${foundCard.balance} руб`);
+}; // Ваша реализация функции
+// Проверка на реальное снятие баланса
+console.log('Проверка на реальное снятие баланса');
+withdraw('4276 1234 5678 9101', 1234, 14000, logGreen, logRed); // Снятие наличных 14000 руб. Баланс: 1000 руб
+withdraw('4276 1234 5678 9101', 1234, 500, logGreen, logRed); // Снятие наличных 500 руб. Баланс: 500 руб
+withdraw('4276 1234 5678 9101', 1234, 501, logGreen, logRed); // Недостаточно средств
+
+separator();
+
+// Проверка на несуществующую карту
+console.log('Проверка на несуществующую карту');
+withdraw('1111 2222 3333 4444', 1234, 501, logGreen, logRed); // Карта не обслуживается!
+
+separator();
+
+// Проверка, что карта блокируется после трех неправильных вводов PIN
+console.log('Проверка, что карта блокируется после трех неправильных вводов PIN');
+withdraw('4276 4444 5555 6666', 1111, 1, logGreen, logRed); // PIN неверный!
+withdraw('4276 4444 5555 6666', 1111, 1, logGreen, logRed); // PIN неверный!
+withdraw('4276 4444 5555 6666', 1111, 1, logGreen, logRed); // Карта заблокирована!
+withdraw('4276 4444 5555 6666', 8765, 1, logGreen, logRed); // Карта не обслуживается!
+
+separator();
+
+// Проверка, что счётчик неправильных попыток сбрасывается после правильного PIN
+console.log('Проверка, что счётчик неправильных попыток сбрасывается после правильного PIN');
+const a = 16000;
+withdraw('4214 7777 8888 9999', 1111, a, logGreen, logRed); // PIN неверный!
+withdraw('4214 7777 8888 9999', 1111, a, logGreen, logRed); // PIN неверный!
+withdraw('4214 7777 8888 9999', 1357, a, logGreen, logRed); // Снятие наличных 16000 руб. Баланс: 16000 руб
+withdraw('4214 7777 8888 9999', 1111, a, logGreen, logRed); // PIN неверный!
+withdraw('4214 7777 8888 9999', 1111, a, logGreen, logRed); // PIN неверный!
+withdraw('4214 7777 8888 9999', 1357, a, logGreen, logRed); // Снятие наличных 16000 руб. Баланс: 0 руб
