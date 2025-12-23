@@ -1,24 +1,60 @@
-const storage = [
-  { age: 10, name: 'Alex' },
-  { age: 20, name: 'Max' },
-  { age: 30, name: 'Jake' },
-  { age: 40, name: 'Lilo' },
-];
+import { faker } from '@faker-js/faker';
 
-const smartSearch = (arr: any[], property: any, value: any) => {
-  // ... Ваш код здесь
-  return arr.find((person) => person[property] === value);
+const filterWithChance = (arr: any[], chance: any) => {
+  return arr.filter(() => {
+    const randomValue = Math.random() * 100;
+
+    return randomValue < chance;
+  });
 };
 
-const person1 = smartSearch(storage, 'age', 30);
-// { age: 30, name: 'Jake' }
+const generateTestData = (count: any) => {
+  return Array.from({ length: count }, () => ({
+    id: faker.string.uuid(),
+    name: faker.person.fullName(),
+    email: faker.internet.email(),
+    age: faker.number.int({ min: 18, max: 80 }),
+    city: faker.location.city(),
+  }));
+};
 
-const person2 = smartSearch(storage, 'age', 10);
-// { age: 10, name: 'Alex' }
+console.log('=== Тестирование функции filterWithChance ===\n');
 
-const person3 = smartSearch(storage, 'name', 'Lilo');
-// { age: 40, name: 'Lilo' }
+// Тест 1: Ваш оригинальный пример
+const numbers = [1, 2, 3, 4, 5, 6];
+console.log('Тест 1: Числовой массив');
+console.log('Исходный массив:', numbers);
+console.log('Шанс: 20%');
+console.log('Результат:', filterWithChance(numbers, 20));
+console.log('');
 
-console.log(person1); // { age: 30, name: 'Jake' }
-console.log(person2); // { age: 10, name: 'Alex' }
-console.log(person3); // { age: 40, name: 'Lilo' }
+// Тест 2: Строковый массив
+const fruits = ['яблоко', 'банан', 'апельсин', 'груша', 'киви', 'манго'];
+console.log('Тест 2: Массив фруктов');
+console.log('Исходный массив:', fruits);
+console.log('Шанс: 50%');
+console.log('Результат:', filterWithChance(fruits, 50));
+console.log('');
+
+// Тест 3: Сгенерированные данные Faker
+const fakeUsers = generateTestData(10);
+console.log('Тест 3: Сгенерированные пользователи (Faker)');
+console.log('Всего пользователей:', fakeUsers.length);
+console.log('Шанс: 30%');
+
+const filteredUsers = filterWithChance(fakeUsers, 30);
+console.log('Отфильтровано пользователей:', filteredUsers.length);
+console.log('Результат (первые 3 если есть):', filteredUsers.slice(0, 3));
+console.log('');
+
+// Тест 4: Крайние случаи
+console.log('Тест 4: Крайние случаи');
+
+// Шанс 0% - ничего не должно отобраться
+console.log('Шанс 0%:', filterWithChance([1, 2, 3], 0));
+
+// Шанс 100% - должно отобраться всё
+console.log('Шанс 100%:', filterWithChance([1, 2, 3], 100));
+
+// Пустой массив
+console.log('Пустой массив:', filterWithChance([], 50));
