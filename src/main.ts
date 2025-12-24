@@ -1,60 +1,59 @@
-import { faker } from '@faker-js/faker';
-
-const filterWithChance = (arr: any[], chance: any) => {
-  return arr.filter(() => {
-    const randomValue = Math.random() * 100;
-
-    return randomValue < chance;
-  });
+type User = {
+  id: number;
+  name: string;
+  age: number;
 };
 
-const generateTestData = (count: any) => {
-  return Array.from({ length: count }, () => ({
-    id: faker.string.uuid(),
-    name: faker.person.fullName(),
-    email: faker.internet.email(),
-    age: faker.number.int({ min: 18, max: 80 }),
-    city: faker.location.city(),
-  }));
+type Car = {
+  id: number;
+  title: string;
+  vin: string;
+  serial: string;
+  pts: Pts;
 };
 
-console.log('=== Тестирование функции filterWithChance ===\n');
+type Pts = {
+  id: number;
+  vin: string;
+  owners: User[];
+};
 
-// Тест 1: Ваш оригинальный пример
-const numbers = [1, 2, 3, 4, 5, 6];
-console.log('Тест 1: Числовой массив');
-console.log('Исходный массив:', numbers);
-console.log('Шанс: 20%');
-console.log('Результат:', filterWithChance(numbers, 20));
-console.log('');
+const adultOwners = (car: Car) => {
+  const adultOwners = car.pts.owners.filter((owner) => owner.age >= 18);
 
-// Тест 2: Строковый массив
-const fruits = ['яблоко', 'банан', 'апельсин', 'груша', 'киви', 'манго'];
-console.log('Тест 2: Массив фруктов');
-console.log('Исходный массив:', fruits);
-console.log('Шанс: 50%');
-console.log('Результат:', filterWithChance(fruits, 50));
-console.log('');
+  const ownersInfo = adultOwners.map((owner) => `${owner.name} (${owner.age})`);
 
-// Тест 3: Сгенерированные данные Faker
-const fakeUsers = generateTestData(10);
-console.log('Тест 3: Сгенерированные пользователи (Faker)');
-console.log('Всего пользователей:', fakeUsers.length);
-console.log('Шанс: 30%');
+  return `Автомобиль "${car.title}"
+VIN: ${car.vin}
+Гос. номер: ${car.serial}
+Совершеннолетние владельцы: ${ownersInfo}`;
+};
 
-const filteredUsers = filterWithChance(fakeUsers, 30);
-console.log('Отфильтровано пользователей:', filteredUsers.length);
-console.log('Результат (первые 3 если есть):', filteredUsers.slice(0, 3));
-console.log('');
+const prius: Car = {
+  id: 38,
+  title: 'Toyota Prius',
+  vin: 'JTDKARFP9L3128187',
+  serial: 'А777МР97',
+  pts: {
+    id: 849325,
+    vin: 'JTDKARFP9L3128187',
+    owners: [
+      { id: 3401, name: 'Лёха Перекуп', age: 35 },
+      { id: 1946, name: 'Вячеслав', age: 14 },
+      { id: 9613, name: 'Стас', age: 7 },
+      { id: 9613, name: 'Татьяна', age: 18 },
+      { id: 6542, name: 'Стас друг Лёхи Перекупа', age: 73 },
+      { id: 6542, name: 'Валентин', age: 73 },
+    ],
+  },
+};
 
-// Тест 4: Крайние случаи
-console.log('Тест 4: Крайние случаи');
+const res = adultOwners(prius);
+console.log(res);
 
-// Шанс 0% - ничего не должно отобраться
-console.log('Шанс 0%:', filterWithChance([1, 2, 3], 0));
-
-// Шанс 100% - должно отобраться всё
-console.log('Шанс 100%:', filterWithChance([1, 2, 3], 100));
-
-// Пустой массив
-console.log('Пустой массив:', filterWithChance([], 50));
+/*
+Автомобиль "Toyota Prius"
+VIN: JTDKARFP9L3128187
+Гос. номер: А777МР97
+Совершеннолетние владельцы: Лёха Перекуп (35), Татьяна (18), Валентин (73)
+ */
