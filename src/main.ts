@@ -1,65 +1,165 @@
-import { faker } from '@faker-js/faker';
+/*
+Прошла школьная олимпиада.
 
-const filterWithChance = (arr: any[], chance: any) => {
-  return arr.filter(() => {
-    const randomValue = Math.random() * 100;
+Вам необходимо определить какое место занял каждый ученик.
+Если ученик не участвовал или не решил ни одного задание - он не занял никакого места и должен находиться внизу списка.
 
-    return randomValue < chance;
-  });
+Вам дан:
+1. Список заданий (Task)
+2. Список учеников (Student)
+3. Список решений заданий учеников (Solution)
+
+У каждого решения есть информация о задании, ученике, времени выполнения и успешности (то есть правильное решение или нет).
+Неправильные решения учитывать не нужно.
+
+За каждое задание даётся разное количество баллов.
+Необходимо вывести по убыванию учеников и полученное в олимпиаде место.
+* Если количество баллов у двух учеников одинаковое - место выше получит тот, кто потратил меньше времени на решение.
+* Если оба ученика не смогли решить ни одной задачи (или не участвовали), тогда выше по списку должен находиться тот, у кого больше попыток решения.
+
+Вы должны вывести вот такой список с такой информацией:
+1. Игорь Игнатенко (8 баллов, 3ч)
+2. Михаил Смирнов (4 балла, 1ч 1мин 1сек)
+3. Алексей Михайлов (4 балла, 1ч 59м 59с)
+4. Иван Петров (3 балла, 0ч 7м 3с)
+5. Владислав Торопыгин (0 баллов, 4 попытки решения)
+6. Антон Синяков (0 баллов, 0 попыток решения)
+ */
+
+type Student = {
+  // Опишите учеников
+  id: number;
+  name: string;
 };
 
-const generateTestData = (count: number) => {
-  const testData = [];
+type Task = {
+  // Опишите задания
+  id: number;
+  title: string;
+  score: number;
+};
 
-  for (let i = 0; i < count; i++) {
-    testData.push({
-      id: faker.string.uuid(),
-      name: faker.person.fullName(),
-      email: faker.internet.email(),
-      age: faker.number.int({ min: 18, max: 80 }),
-      city: faker.location.city(),
-    });
+type Time = {
+  hours: number;
+  minutes: number;
+  seconds: number;
+};
+
+type Solution = {
+  // Опишите решения
+  id: number;
+  studentId: number;
+  taskId: number;
+  correct: boolean;
+  time: Time;
+};
+
+const students: Student[] = [
+  { id: 8, name: 'Иван Петров' }, // Решил задания 1, 2 (В сумме 3 балла за 7 мин 3 сек)
+  { id: 18, name: 'Алексей Михайлов' }, // Решил задание 3 (В сумме 4 балла за 1ч 59мин 59сек)
+  { id: 5, name: 'Игорь Игнатенко' }, // Решил задания 2,4 (В сумме 8 баллов за 3ч)
+  { id: 39, name: 'Михаил Смирнов' }, // Решил задание 3 (В сумме 4 балла за 1ч 1мин 1сек)
+  { id: 22, name: 'Владислав Торопыгин' }, // Не решил ни одной задачи, но было 4 попытки решения
+  { id: 27, name: 'Антон Синяков' }, // Не решил ни одной задачи, и вообще не было попыток решения
+];
+
+const tasks: Task[] = [
+  { id: 1, title: 'Крысиные бега', score: 1 },
+  { id: 2, title: 'Мышеловка', score: 2 },
+  { id: 3, title: 'Хитрый козел', score: 4 },
+  { id: 4, title: 'Шах и мат', score: 6 },
+];
+
+const solutions: Solution[] = [
+  // Иван
+  { id: 5, studentId: 8, taskId: 1, correct: true, time: { hours: 0, minutes: 5, seconds: 3 } },
+  { id: 35, studentId: 8, taskId: 2, correct: true, time: { hours: 0, minutes: 2, seconds: 0 } },
+
+  // Алексей
+  { id: 74, studentId: 18, taskId: 3, correct: true, time: { hours: 1, minutes: 59, seconds: 59 } },
+  { id: 29, studentId: 18, taskId: 4, correct: false, time: { hours: 0, minutes: 45, seconds: 45 } },
+
+  // Игорь
+  { id: 73, studentId: 5, taskId: 2, correct: true, time: { hours: 1, minutes: 20, seconds: 18 } },
+  { id: 32, studentId: 5, taskId: 4, correct: true, time: { hours: 1, minutes: 25, seconds: 25 } },
+  { id: 64, studentId: 5, taskId: 3, correct: false, time: { hours: 0, minutes: 14, seconds: 17 } },
+
+  // Михаил
+  { id: 45, studentId: 39, taskId: 4, correct: false, time: { hours: 0, minutes: 5, seconds: 3 } },
+  { id: 90, studentId: 39, taskId: 2, correct: false, time: { hours: 0, minutes: 5, seconds: 3 } },
+  { id: 10, studentId: 39, taskId: 3, correct: true, time: { hours: 1, minutes: 1, seconds: 1 } },
+
+  // Владислав
+  { id: 85, studentId: 22, taskId: 1, correct: false, time: { hours: 1, minutes: 1, seconds: 1 } },
+  { id: 55, studentId: 22, taskId: 2, correct: false, time: { hours: 1, minutes: 1, seconds: 1 } },
+  { id: 66, studentId: 22, taskId: 3, correct: false, time: { hours: 1, minutes: 1, seconds: 1 } },
+  { id: 77, studentId: 22, taskId: 4, correct: false, time: { hours: 1, minutes: 1, seconds: 1 } },
+];
+
+type StudentInfo = {
+  name: string;
+  totalScore: number;
+  totalSeconds: number;
+  failSolutionsCount: number;
+};
+
+const convertTimeToSeconds = (time: Time) => {
+  return time.hours * 3600 + time.minutes * 60 + time.seconds;
+};
+const convertSecondsToTime = (seconds: number): Time => {
+  let n = seconds;
+
+  const hours = Math.floor(n / 3600);
+  n = n % 3600;
+
+  const minutes = Math.floor(n / 60);
+  n = n % 60;
+
+  return { hours, minutes, seconds: n };
+};
+
+const results: StudentInfo[] = [];
+
+for (const student of students) {
+  const successSolutions = solutions.filter((solution) => student.id === solution.studentId && solution.correct);
+  const failSolutions = solutions.filter((solution) => student.id === solution.studentId && !solution.correct);
+
+  let totalSeconds = 0;
+  let totalScore = 0;
+  for (const solution of successSolutions) {
+    const task = tasks.find((task) => task.id === solution.taskId);
+    if (!task) continue;
+
+    totalSeconds += convertTimeToSeconds(solution.time);
+    totalScore += task.score;
   }
-  return testData;
-};
 
-console.log('=== Тестирование функции filterWithChance ===\n');
+  results.push({
+    name: student.name,
+    totalScore,
+    failSolutionsCount: failSolutions.length,
+    totalSeconds,
+  });
+}
 
-// Тест 1: Ваш оригинальный пример
-const numbers = [1, 2, 3, 4, 5, 6];
-console.log('Тест 1: Числовой массив');
-console.log('Исходный массив:', numbers);
-console.log('Шанс: 20%');
-console.log('Результат:', filterWithChance(numbers, 20));
-console.log('');
+results.sort((a, b) => {
+  if (a.totalScore === 0 && b.totalScore === 0) {
+    return a.failSolutionsCount < b.failSolutionsCount ? 1 : -1;
+  }
 
-// Тест 2: Строковый массив
-const fruits = ['яблоко', 'банан', 'апельсин', 'груша', 'киви', 'манго'];
-console.log('Тест 2: Массив фруктов');
-console.log('Исходный массив:', fruits);
-console.log('Шанс: 50%');
-console.log('Результат:', filterWithChance(fruits, 50));
-console.log('');
+  if (a.totalScore === b.totalScore) {
+    return a.totalSeconds < b.totalSeconds ? -1 : 1;
+  }
 
-// Тест 3: Сгенерированные данные Faker
-const fakeUsers = generateTestData(10);
-console.log('Тест 3: Сгенерированные пользователи (Faker)');
-console.log('Всего пользователей:', fakeUsers);
-console.log('Шанс: 30%');
+  return a.totalScore < b.totalScore ? 1 : -1;
+});
 
-const filteredUsers = filterWithChance(fakeUsers, 30);
-console.log('Отфильтровано пользователей:', filteredUsers.length);
-console.log('Результат (первые 3 если есть):', filteredUsers.slice(0, 3));
-console.log('');
+for (let i = 0; i < results.length; i++) {
+  const res = results[i];
 
-// Тест 4: Крайние случаи
-console.log('Тест 4: Крайние случаи');
+  const time = convertSecondsToTime(res.totalSeconds);
 
-// Шанс 0% - ничего не должно отобраться
-console.log('Шанс 0%:', filterWithChance([1, 2, 3], 0));
-
-// Шанс 100% - должно отобраться всё
-console.log('Шанс 100%:', filterWithChance([1, 2, 3], 100));
-
-// Пустой массив
-console.log('Пустой массив:', filterWithChance([], 50));
+  console.log(
+    `${i + 1}. ${res.name} Баллов: ${res.totalScore} Время: ${time.hours} ч ${time.minutes} мин ${time.seconds} сек`,
+  );
+}
