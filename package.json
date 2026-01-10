@@ -25,7 +25,7 @@
     "endOfLine": "auto"
   },
   "scripts": {
-    "start": "node ./dist/main.js"
+    "start": "ts-node ./src/main.ts"
   },
   "repository": {
     "type": "git",
@@ -37,5 +37,9 @@
     "url": "https://github.com/sargis02102005/TS/issues"
   },
   "homepage": "https://github.com/sargis02102005/TS#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "@faker-js/faker": "^10.1.0",
+    "chalk": "^5.6.2"
+  }
 }
