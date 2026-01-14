@@ -1,51 +1,60 @@
-enum Team {
-  red = 'red',
-  blue = 'blue',
-}
+/*
+Вам даны несколько списков учащихся разных школ.
+Напишите функцию, которая принимает на вход список школ (переменную schools).
+И выводит имена всех учеников, которым от 10 до 15 лет.
+При этом выводить имена нужно по возрастанию возраста ученика (если возраст одинаковый - имена по алфавиту)
 
-type User = {
-  id: number;
+Вывод программы должен быть следующим:
+Иван
+Дмитрий
+Александр
+Дмитрий
+Роман
+Серафим
+ */
+
+type Student = {
+  // Опишите ученика
   name: string;
   age: number;
 };
 
-type ProcessedUser = {
-  name: string;
-  isAdult: boolean;
-  team: Team;
-};
-
-const users: User[] = [
-  { id: 7, name: 'Александр Сильвестрович', age: 17 },
-  { id: 17, name: 'Райан Сергеевич Гослинг', age: 18 },
-  { id: 27, name: 'Джейсон Райанович Стетхем', age: 19 },
-  { id: 37, name: 'Имя не указано', age: 8 },
+const schools: Student[][] = [
+  [
+    // Ученики первой школы
+    { age: 10, name: 'Иван' },
+    { age: 13, name: 'Серафим' },
+    { age: 8, name: 'Евгений' },
+    { age: 11, name: 'Дмитрий' },
+  ],
+  [
+    // Ученики второй школы
+    { age: 9, name: 'Евгений' },
+    { age: 10, name: 'Алексей' },
+  ],
+  [
+    // Ученики третьей школы
+    { age: 12, name: 'Александр' },
+    { age: 12, name: 'Дмитрий' },
+  ],
+  [
+    // Ученики четвертой школы
+    { age: 13, name: 'Роман' },
+    { age: 16, name: 'Максим' },
+  ],
 ];
 
-const processUsers = (users: User[]): ProcessedUser[] => {
-  // ... здесь ваш код
-  const processed = users.filter((user) => user.age >= 18);
+const lestStudents = (school: Student[][]) => {
+  const allStudents: Student[] = [];
+  for (const students of school) {
+    for (const student of students) {
+      allStudents.push(student);
+    }
+  }
 
-  const processUsers = processed.map((user) => {
-    const team = Math.random() < 0.5 ? Team.red : Team.blue;
-
-    return {
-      name: user.name,
-      isAdult: true,
-      team,
-    };
-  });
-
-  return processUsers;
+  const student = allStudents.filter((item) => item.age >= 10 && item.age <= 15);
+  const res = student.sort((a, b) => a.age - b.age || a.name.localeCompare(b.name));
+  return res.map((item) => console.log(item.name));
 };
 
-const processed: ProcessedUser[] = processUsers(users);
-
-console.log(processed);
-/*
-Пример вывода! Команды будут случайными!
-[
- { name: 'Райан Сергеевич Гослинг', isAdult: true, team: 'red' },
- { name: 'Джейсон Райанович Стетхем', isAdult: true, team: 'blue' },
-]
- */
+lestStudents(schools);
