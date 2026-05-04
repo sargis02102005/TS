@@ -1,24 +1,20 @@
-import { fakerRU } from '@faker-js/faker';
-import { appendFileSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
+
+const rows = readFileSync('./report.csv', 'utf8').split('\n');
 
 const orders = [];
 
-for (let i = 0; i < 10; i++) {
+for (let i = 1; i < rows.length - 1; i++) {
+  const [id, name, country, company, price, currency] = rows[i].split(';');
+
   orders.push({
-    id: fakerRU.number.int({ min: 10, max: 100000 }),
-    clientName: fakerRU.person.fullName(),
-    clientCountry: fakerRU.location.country(),
-    clientCompany: fakerRU.company.name(),
-    price: fakerRU.number.float({ min: 100, max: 100000, fractionDigits: 2 }),
-    currency: fakerRU.finance.currencySymbol(),
+    id: Number(id),
+    name: String(name),
+    country: String(country),
+    company: String(company),
+    price: Number(price),
+    currency: String(currency),
   });
 }
 
-writeFileSync('report.txt', 'id,name,country,company,price,currency\n', { encoding: 'utf-8' });
-for (const order of orders) {
-  const data = [order.id, order.clientName, order.clientCountry, order.clientCompany, order.price, order.currency];
-
-  appendFileSync('report.txt', data.join(',') + `\n`, {
-    encoding: 'utf-8',
-  });
-}
+console.log(orders);
