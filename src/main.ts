@@ -1,20 +1,9 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync } from 'fs';
 
-const rows = readFileSync('./report.csv', 'utf8').split('\n');
+// Прочитали весь текст
+const content = readFileSync('./text.txt', 'utf8');
 
-const orders = [];
-
-for (let i = 1; i < rows.length - 1; i++) {
-  const [id, name, country, company, price, currency] = rows[i].split(';');
-
-  orders.push({
-    id: Number(id),
-    name: String(name),
-    country: String(country),
-    company: String(company),
-    price: Number(price),
-    currency: String(currency),
-  });
+// Разделили его в массив по строчках и вывели каждую с указанием длины
+for (const line of content.split('\n')) {
+  console.log(`(${line.length}) ${line}`);
 }
-
-console.log(orders);
