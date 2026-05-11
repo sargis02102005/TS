@@ -1,21 +1,28 @@
-/*
-Вам дано стихотворение.
-Скопируйте его себе в текстовый файл.
+import { readFileSync } from 'node:fs';
 
-Необходимо в нём все буквы "а" заменить на буквы "о" и обновлённое стихотворение записать в новый файл.
-Замена должна быть и для заглавных, и для прописных букв.
+const content = readFileSync('./append.csv', 'utf8').split('\n');
+const days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
 
-✦ 🔥 Усложнённая версия (необязательно) - замените буквы "о" на "а" и "а" на "о"
-То есть, поменяйте буквы "а" и "о" местами. Обновлённое стихотворение запишите в новый файл.
+let Index = 0;
 
- */
-import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
-
-const content = readFileSync('./text.txt', 'utf8');
-
-writeFileSync('./append.txt', '', 'utf-8');
-for (const item of content.split('\n')) {
-  if (item.includes('а') || item.includes('А')) {
-    appendFileSync('./append.txt', item.replace(/а/g, 'о').replace(/А/g, 'О') + '\n', 'utf-8');
+let maxDayIndex = 0;
+let maxPosition = 0;
+for (const items of content) {
+  for (const item of items.split(',')) {
+    if (Number(item) > Index) {
+      Index = Number(item);
+    }
+  }
+  for (let j = 0; j < items.split(',').length; j++) {
+    if (Index === Number(items.split(',')[j])) {
+      maxPosition = j + 1;
+      maxDayIndex++;
+      break;
+    }
   }
 }
+
+const day = days[maxDayIndex % 7];
+
+console.log(`Наибольший заказ - ${Index}
+Он сделан в ${day}, по порядку #${maxPosition}`);
