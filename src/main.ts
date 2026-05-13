@@ -1,28 +1,63 @@
-import { readFileSync } from 'node:fs';
+import { faker } from '@faker-js/faker';
+import { appendFileSync, writeFileSync } from 'node:fs';
 
-const content = readFileSync('./append.csv', 'utf8').split('\n');
-const days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
+const files = [];
 
-let Index = 0;
+for (let i = 0; i < 2000; i++) {
+  files.push({
+    fullName: faker.person.fullName(),
 
-let maxDayIndex = 0;
-let maxPosition = 0;
-for (const items of content) {
-  for (const item of items.split(',')) {
-    if (Number(item) > Index) {
-      Index = Number(item);
-    }
-  }
-  for (let j = 0; j < items.split(',').length; j++) {
-    if (Index === Number(items.split(',')[j])) {
-      maxPosition = j + 1;
-      maxDayIndex++;
-      break;
-    }
-  }
+    jobTitle: faker.person.jobTitle(),
+    // number
+    age: faker.number.int({ min: 18, max: 100 }),
+
+    randomNumber: faker.number.int({ min: 1, max: 1000 }),
+    // internet
+    email: faker.internet.email(),
+    // location
+    country: faker.location.country(),
+
+    city: faker.location.city(),
+
+    zipCode: faker.location.zipCode(),
+    // commerce
+    product: faker.commerce.product(),
+
+    price: faker.commerce.price(),
+    // vehicle
+    vehicle: faker.vehicle.vehicle(),
+    // company
+    companyName: faker.company.name(),
+    // date
+    birthDate: faker.date.birthdate(),
+    // finance
+    iban: faker.finance.iban(),
+  });
 }
 
-const day = days[maxDayIndex % 7];
+writeFileSync(
+  'append.csv',
+  'fullName,jobTitle,randomNumber,email,country,city,zipCode,product,price,vehicle,companyName,birthDate,iban,\n',
+  { encoding: 'utf-8' },
+);
+for (const file of files) {
+  const data = [
+    file.fullName,
+    file.jobTitle,
+    file.randomNumber,
+    file.email,
+    file.country,
+    file.city,
+    file.zipCode,
+    file.product,
+    file.price,
+    file.vehicle,
+    file.companyName,
+    file.birthDate,
+    file.iban,
+  ];
 
-console.log(`Наибольший заказ - ${Index}
-Он сделан в ${day}, по порядку #${maxPosition}`);
+  appendFileSync('append.csv', data.join(',') + '\n', {
+    encoding: 'utf-8',
+  });
+}
